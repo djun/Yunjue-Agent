@@ -31,11 +31,12 @@ We welcome connections of all kinds. For financing inquiries, technical exchange
 
 - **[2026-01-26]** 🎉 **Initial Release**: We have open-sourced the **Yunjue Agent** system!
 - **[2026-01-31]** 📦 **Data Release**: We released the system logs under **zero-start settings** for five benchmark datasets (**HLE**, **DeepSearchQA**, **FinSearchComp (T2&T3)**, **xbench-ScienceQA** and **xbench-DeepSearch**): [Google Drive](https://drive.google.com/drive/folders/1mL5PqKZwOUVIP-UYg0bZr11fotpZmcqb?usp=sharing). New: [Huggingface Dataset for one line code analysis](https://huggingface.co/datasets/YunjueTech/Yunjue-Agent-Traces).
-- **[2026-01-31]** ✨ **Reproduction & Evaluation Update**: We organized the evaluation script and reproduction workflow (see [Reproducing & evaluating results](#-reproducing--evaluating-results) below).
+- **[2026-01-31]** ✨ **Reproduction & Evaluation Update**: We organized the evaluation script and reproduction workflow (see [Reproducing Results](#-reproducing-results) below).
 - **[2026-02-08]** 📄 **Tech Report Update**: We updated the tech report, adding more theoretical and experimental analysis on system performance, cost, and Evolutionary Generality Loss (EGL). You can access it via [arXiv](https://arxiv.org/abs/2601.18226) or the [local PDF](tech_report/YunjueAgentTechReport.pdf).
-- **[Expected: Around Lunar New Year(TBD)]**: An online demo works like Manus / Deep Research.
+- **[2026-02-11]** 🔀 **Reproduction Branch Update**: We migrated reproduction to a dedicated stable branch: [reproduce](https://github.com/YunjueTech/Yunjue-Agent/tree/reproduce).
+- **[2026-02-11]** 🎬 **Demo Release**: We implemented two demos (Web Demo and CLI Skill Demo). See [Demo Quick Start](#-demo-quick-start) below.
 
-> **⚠️ Note on Current Release**: The current codebase is an initial release refactored from our research experiments. While we have verified the core logic, there might be minor bugs or edge cases during reproduction. We are continuously cleaning up the code and welcome any issues or PRs!
+
 ---
 
 ## 🚀 Quick Start
@@ -44,11 +45,9 @@ We welcome connections of all kinds. For financing inquiries, technical exchange
 
 - **Python**: 3.12 or higher
 - **Package Manager**: [`uv`](https://docs.astral.sh/uv/)
-- **Operating System**: Linux
+- **Operating System**: MacOS
 
 ### ⚡ Quick Setup
-
-**Example**: Start evolving from DeepSearchQA.
 
 ```bash
 # 1. Clone and setup
@@ -65,47 +64,53 @@ cp .env.example .env
 cp conf.yaml.example conf.yaml
 
 source .venv/bin/activate
-
-./scripts/evolve.sh --dataset DEEPSEARCHQA --run_name test --batch_size 1 --start 0
 ```
-
-🎉 **Expected Output:** Your agent will start completing questions from DeepSearchQA. You can view the corresponding logs in `output/test` 😊
 
 ### ⚙️ Configuration
 
 - **Configuration reference**: see `docs/configuration_reference.md` for the meaning of key fields in `.env` (e.g., `TAVILY_API_KEY`, `MAX_WORKER_RECURSION_LIMIT`, `MAX_TASK_EXECUTION_CNT`, `PROXY_URL`) and `conf.yaml` (e.g., `VISION_MODEL`, `SUMMARIZE_MODEL`).
 - **Config templates**: start from `.env.example` and `conf.yaml.example`.
 
-### 🧪 Reproducing & evaluating results
+### 🧪 Reproducing Results
 
-- **Reproduction guide (datasets + exact commands)**: see `docs/reproduce.md`.
-- **Main scripts**:
-  - `scripts/evolve.sh`: run the evolution loop to generate predictions under `output/<RUN_NAME>/`.
-  - `scripts/evaluate.py`: evaluate a run (e.g., `uv run scripts/evaluate.py --benchmark ... --predictions ...`).
+- We have migrated reproduction to a stable branch for reproducibility: [reproduce](https://github.com/YunjueTech/Yunjue-Agent/tree/reproduce)
+- For a detailed reproduction guide, please refer to that branch.
 - **System Traces**: We provide full system traces on [Hugging Face](https://huggingface.co/datasets/YunjueTech/Yunjue-Agent-Traces) for analysis.
+
+### 🎬 Demo Quick Start
+
+> Note: Currently tested only on MacOS. If you encounter any issues, feel free to open an issue or submit a PR.
+
+#### Web Demo
+
+We provide a web demo that developers can deploy themselves to demonstrate Yunjue Agent's tool self-evolution capabilities and execution process. The first demo shows the Agent executing tool decomposition, creating tools to search and scrape PDFs from the internet; the second demo demonstrates the ability to search for US stock information by reusing existing tools.
+
+```bash
+source .venv/bin/activate
+uvicorn web_demo.app:app --app-dir . --port 8000
+```
+
+- UI: `http://127.0.0.1:8000/`
+- Health: `http://127.0.0.1:8000/health`
+- Detailed guide: `docs/web_demo.md`
+
+#### CLI Skill Demo
+
+Yunjue Agent streamlines the path from expertise to action. By simply providing a `SKILL.md` as we believe high-level experience remains a human-driven asset, the agent autonomously generates the necessary tools to execute those skills. Experience the seamless transformation of documented knowledge into functional automation.
+
+```bash
+source .venv/bin/activate
+python -m cli.cli
+```
+
+- Example skills: `example/cli/skills`
+- Detailed guide: `docs/cli.md`
 
 ---
 
 ## 🤖 What is Yunjue Agent?
 
 Conventional agent systems often struggle in open-ended environments where task distributions continuously drift and external supervision is scarce. Their reliance on static toolsets or offline training lags behind these dynamics, leaving the system's capability boundaries rigid and unknown. To address this, we propose the *In-Situ Self-Evolving* paradigm. This approach treats sequential task interactions as a continuous stream of experience, enabling the system to distill short-term execution feedback into long-term, reusable capabilities without access to ground-truth labels. Within this framework, we identify *tool evolution* as the critical pathway for capability expansion, which provides verifiable, binary feedback signals. Within this framework, we develop *Yunjue Agent*, a system that iteratively synthesizes, optimizes, and reuses tools to navigate emerging challenges. To optimize evolutionary efficiency, we further introduce a *Parallel Batch Evolution* strategy. Empirical evaluations across five diverse benchmarks under a zero-start setting demonstrate significant performance gains over proprietary baselines. Additionally, complementary warm-start evaluations confirm that the accumulated general knowledge can be seamlessly transferred to novel domains. Finally, we propose a novel metric to monitor evolution convergence, serving as a function analogous to training loss in conventional optimization. We open-source our codebase, system traces, and evolved tools to facilitate future research in resilient, self-evolving intelligence.
-
-<div align="center">
-<img src="docs/assets/overview.png" width="100%" alt="Yunjue Agent Architecture">
-</div>
-
-<table align="center" style="border: 1px solid #ccc; border-radius: 8px; padding: 12px; background-color: #f9f9f9; width: 60%;">
-  <tr>
-    <td style="text-align: center; padding: 10px;">
-      <strong>Demo</strong> 
-      <br>
-      <video src="https://github.com/user-attachments/assets/6bcc6aa2-f982-4685-8b2a-846e4a03bf3e"
-             controls muted preload="metadata"
-             width="50%" height="50%"
-      </video>
-    </td>
-  </tr>
-</table>
 
 ---
 

@@ -35,12 +35,10 @@
 
 * **[2026-01-26]** 🎉 **首次发布**：我们开源了 **Yunjue Agent** 框架！
 * **[2026-01-31]** 📦 **数据发布**：我们发布了在 **5 个数据集**（**HLE**, **DeepSearchQA**, **FinSearchComp (T2&T3)**, **xbench-ScienceQA** 和 **xbench-DeepSearch**）**zero-start settings** 下的系统日志：[Google Drive](https://drive.google.com/drive/folders/1mL5PqKZwOUVIP-UYg0bZr11fotpZmcqb?usp=sharing)。新增访问方式：[Huggingface Dataset](https://huggingface.co/datasets/YunjueTech/Yunjue-Agent-Traces)支持一键导入执行轨迹分析。
-* **[2026-01-31]** ✨ **复现与评测更新**：我们整理了评测脚本与复现流程（见下方 [复现与评测](#-复现与评测) 小节）。
+* **[2026-01-31]** ✨ **复现与评测更新**：我们整理了评测脚本与复现流程（见下方 [复现结果](#-复现结果) 小节）。
 * **[2026-02-08]** 📄 **技术报告更新**: 我们更新了技术报告，增加更多系统性能、成本以及 Evolutionary generality loss (EGL) 的理论与实验分析。您可以从 [arXiv](https://arxiv.org/abs/2601.18226) 或 [本地 PDF](tech_report/YunjueAgentTechReport.pdf) 获取。
-* **[预计: 春节附近（不确定，可能迟延）]** 类似于Manus和Deep Research的Web Demo。
-
-
-> **⚠️ 关于当前版本的说明**：当前代码库是基于我们研究实验重构的初始版本。虽然我们已经验证了核心逻辑，但在复现过程中可能会遇到少量 Bug 或边缘情况。我们正在持续清理代码，欢迎提交 Issue 或 PR！
+* **[2026-02-11]** 🔀 **复现分支更新**：我们已将复现流程迁移到独立稳定分支：[reproduce](https://github.com/YunjueTech/Yunjue-Agent/tree/reproduce)。
+* **[2026-02-11]** 🎬 **Demo 发布**：我们新增了两个 Demo（Web Demo 和 CLI Skill Demo），见下方 [Demo 快速开始](#-demo-快速开始) 小节。
 
 ---
 
@@ -50,11 +48,9 @@
 
 * **Python**: 3.12 或更高版本
 * **包管理器**: [`uv`](https://docs.astral.sh/uv/)
-* **操作系统**: Linux
+* **操作系统**: MacOS
 
 ### ⚡ 快速安装
-
-**示例**：从 DeepSearchQA 数据集开始进化。
 
 ```bash
 # 1. 克隆并设置
@@ -71,25 +67,47 @@ cp .env.example .env
 cp conf.yaml.example conf.yaml
 
 source .venv/bin/activate
-
-./scripts/evolve.sh --dataset DEEPSEARCHQA --run_name test --batch_size 1 --start 0
-
 ```
-
-🎉 **预期输出**：你的 Agent 将开始完成 DeepSearchQA 中的问题。你可以在 `output/test` 中查看相应的日志 😊
 
 ### ⚙️ 配置说明
 
 - **配置字段解释**：请阅读 `docs/configuration_reference.md`（包含 `.env` 的关键字段，如 `TAVILY_API_KEY`、`MAX_WORKER_RECURSION_LIMIT`、`MAX_TASK_EXECUTION_CNT`、`PROXY_URL`，以及 `conf.yaml` 的字段，如 `VISION_MODEL`、`SUMMARIZE_MODEL`）。
 - **配置模板**：从 `.env.example` 与 `conf.yaml.example` 开始修改。
 
-### 🧪 复现与评测
+### 🧪 复现结果
 
-- **复现指南（各数据集 + 命令）**：请阅读 `docs/reproduce.md`。
-- **关键脚本**：
-  - `scripts/evolve.sh`：运行进化流程，生成 `output/<RUN_NAME>/` 下的预测结果。
-  - `scripts/evaluate.py`：对运行结果进行评测（例如 `uv run scripts/evaluate.py --benchmark ... --predictions ...`）。
+- 我们已将复现迁移到稳定分支以保证可复现性：[reproduce](https://github.com/YunjueTech/Yunjue-Agent/tree/reproduce)
+- 详细复现指南请参考该分支。
 - **系统轨迹**：我们在 [Hugging Face](https://huggingface.co/datasets/YunjueTech/Yunjue-Agent-Traces) 上提供了完整的系统轨迹供分析。
+
+### 🎬 Demo 快速开始
+
+> 注：目前仅在 MacOS 上测试过。如遇到问题，欢迎提 Issue 和 PR。
+
+#### Web Demo
+
+我们提供了一个可由开发者自行部署的 Web Demo，用于展示 Yunjue Agent 的工具自进化能力与执行过程。第一个 Demo 展示 Agent 如何进行工具分解，并创建工具来从互联网搜索与抓取 PDF；第二个 Demo 展示了通过复用已有工具来搜索美股信息的能力。
+
+```bash
+source .venv/bin/activate
+uvicorn web_demo.app:app --app-dir . --port 8000
+```
+
+- UI: `http://127.0.0.1:8000/`
+- 健康检查: `http://127.0.0.1:8000/health`
+- 详细指南: `docs/web_demo.md`
+
+#### CLI Skill Demo
+
+Yunjue Agent 简化了从经验到执行的路径。你只需提供一份 `SKILL.md`（我们认为高层经验仍然是由人驱动的重要资产），Agent 就会自主生成执行这些技能所需的工具。让文档化知识无缝转化为可执行自动化。
+
+```bash
+source .venv/bin/activate
+python -m cli.cli
+```
+
+- 示例技能目录: `example/cli/skills`
+- 详细指南: `docs/cli.md`
 
 ---
 
@@ -100,23 +118,6 @@ source .venv/bin/activate
 这种方法将连续的任务交互视为持续的经验流，使系统能够在没有真实标签的情况下，将短期执行反馈提炼为长期的、可复用的能力。在此框架内，我们将 **工具进化** 视为能力扩展的关键路径，因为它提供了可验证的二元反馈信号。基于此框架，我们开发了 **Yunjue Agent**，这是一个能够迭代合成、优化和复用工具以应对新挑战的系统。
 
 为了优化进化效率，我们进一步引入了 **并行批量进化** 策略。在零起点设置下对五个不同基准进行的实证评估表明，该系统显著优于专有基线模型。此外，补充的热启动评估证实，积累的通用知识可以无缝迁移到新领域。最后，我们提出了一种监控进化收敛的新指标，其功能类似于传统优化中的训练损失。我们开源了代码库、系统轨迹和进化后的工具，以促进对弹性、自进化智能的未来研究。
-
-<div align="center">
-<img src="docs/assets/overview.png" width="100%" alt="Yunjue Agent 架构概览">
-</div>
-
-<table align="center" style="border: 1px solid #ccc; border-radius: 8px; padding: 12px; background-color: #f9f9f9; width: 60%;">
-  <tr>
-    <td style="text-align: center; padding: 10px;">
-      <strong>Demo</strong> 
-      <br>
-      <video src="https://github.com/user-attachments/assets/6bcc6aa2-f982-4685-8b2a-846e4a03bf3e"
-             controls muted preload="metadata"
-             width="50%" height="50%"
-      </video>
-    </td>
-  </tr>
-</table>
 
 ---
 
