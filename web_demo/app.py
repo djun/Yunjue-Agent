@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import shutil
+from datetime import datetime
 from pathlib import Path
 from typing import Any, AsyncIterator, Callable, Dict, Optional, Tuple
 
@@ -20,7 +21,8 @@ EventSource = Callable[["ChatRequest"], AsyncIterator[GraphEvent]]
 
 
 def log(message: str) -> None:
-    print(f"[backend] {message}", flush=True)
+    ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print(f"[{ts}][backend] {message}", flush=True)
 
 
 class ChatRequest(BaseModel):
